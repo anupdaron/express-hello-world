@@ -20,7 +20,7 @@
   "homepage": "https://github.com/cyclic-software/express-hello-world#readme",
   "dependencies": {
     "express": "^4.18.2",
-    "aws-sdk": "^2.1528.0",
+    "aws-sdk": "^2.1528.0"
 
   },
   "devDependencies": {
