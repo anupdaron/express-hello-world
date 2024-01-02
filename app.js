@@ -41,10 +41,10 @@ app.post('/create', async (req, res) => {
     }).promise();
 
     // Construct the file URL
-    const fileUrl = `https://${process.env.BUCKET}.s3.amazonaws.com/${uniqueFilename}`;
+    const downloadUrl = `https://${process.env.BUCKET}.s3.amazonaws.com/${uniqueFilename}`;
 
     // Send the file URL as response
-    res.send({ fileUrl });
+    res.send({ downloadUrl });
   } catch (err) {
     console.error('Error uploading file to S3:', err);
     res.status(500).send('Error uploading file');
