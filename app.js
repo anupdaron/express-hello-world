@@ -45,7 +45,7 @@ app.post('/create', async (req, res) => {
     // Send the file URL as response
     res.send({ fileName: uniqueFilename });
 
-       setTimeout(() => {
+       setTimeout(async() => {
        await s3.deleteObject({
     Bucket: process.env.BUCKET,
     Key: uniqueFilename,
