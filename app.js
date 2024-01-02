@@ -41,15 +41,49 @@ app.post('/create', async (req, res) => {
     }).promise();
 
     // Construct the file URL
-    const downloadUrl = `https://${process.env.BUCKET}.s3.amazonaws.com/${uniqueFilename}`;
 
     // Send the file URL as response
-    res.send({ downloadUrl });
+    res.send({ fileName: uniqueFilename });
+
+       setTimeout(() => {
+       await s3.deleteObject({
+    Bucket: process.env.BUCKET,
+    Key: uniqueFilename,
+  }).promise()
+
+      }, 60000); 
   } catch (err) {
     console.error('Error uploading file to S3:', err);
     res.status(500).send('Error uploading file');
   }
 });
+
+app.get('/download/:filename', async (req, res) => {
+  const filename = req.params.filename;
+
+  try {
+    let s3File = await s3.getObject({
+      Bucket: process.env.BUCKET,
+      Key: filename,
+    }).promise();
+
+    // Set headers to prompt download
+    res.setHeader('Content-Disposition', 'attachment; filename=' + filename);
+    res.setHeader('Content-Type', s3File.ContentType);
+
+    // Pipe the S3 file stream directly to the response
+    res.send(s3File.Body);
+  } catch (error) {
+    if (error.code === 'NoSuchKey') {
+      console.log(`No such key: ${filename}`);
+      res.status(404).send('File not found');
+    } else {
+      console.error('Error:', error);
+      res.status(500).send('Internal Server Error');
+    }
+  }
+});
+
 
 // #############################################################################
 // This configures static hosting for files in /public that have the extensions
