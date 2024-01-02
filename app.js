@@ -2,6 +2,9 @@ const express = require('express')
 const path = require("path");
 const app = express()
 const fs = require('fs'); 
+const AWS = require("aws-sdk");
+const s3 = new AWS.S3()
+
 // Specify a directory to serve files from
 const publicDirectoryPath = path.join(__dirname, '/public');
 app.use(express.static(publicDirectoryPath));
@@ -20,27 +23,32 @@ app.use(function (req, res, next) {
   next();
 });
 // create a route for the app to create jsonl file with received data
-app.post('/create', (req, res) => {
+app.post('/create', async (req, res) => {
   // Generate a unique filename
-  const uniqueFilename = `finetune_${Date.now()}_${Math.floor(Math.random() * 1000)}.jsonl`;
-  const filePath = path.join(publicDirectoryPath, uniqueFilename);
+  const uniqueFilename = `prosperitydata_${Date.now()}_${Math.floor(Math.random() * 1000)}.jsonl`;
 
   // Create jsonl file with received data
   const data = req.body;
-  console.log(data)
   const jsonl = data.map((item) => JSON.stringify(item)).join('\n');
 
-  fs.writeFile(filePath, jsonl, (err) => {
-    if (err) {
-      console.error('Error saving file:', err);
-      res.status(500).send('Error saving file');
-    } else {
-      console.log('The file has been saved!');
-      // Return the download URL
-      const downloadUrl = `http://${req.headers.host}/${uniqueFilename}`;
-      res.send({ downloadUrl });
-    }
-  });
+  try {
+    // Upload the file to S3
+    await s3.putObject({
+      Body: jsonl,
+      Bucket: process.env.BUCKET,
+      Key: uniqueFilename,
+      ContentType: 'application/json',
+    }).promise();
+
+    // Construct the file URL
+    const fileUrl = `https://${process.env.BUCKET}.s3.amazonaws.com/${uniqueFilename}`;
+
+    // Send the file URL as response
+    res.send({ fileUrl });
+  } catch (err) {
+    console.error('Error uploading file to S3:', err);
+    res.status(500).send('Error uploading file');
+  }
 });
 
 // #############################################################################
