@@ -25,7 +25,7 @@ app.use(function (req, res, next) {
 // create a route for the app to create jsonl file with received data
 app.post('/create', async (req, res) => {
   // Generate a unique filename
-  const uniqueFilename = `prosperitydata_${Date.now()}_${Math.floor(Math.random() * 1000)}.jsonl`;
+  const uniqueFilename = `data_${Date.now()}_${Math.floor(Math.random() * 1000)}.jsonl`;
 
   // Create jsonl file with received data
   const data = req.body;
