@@ -113,7 +113,7 @@
                 .then((response) => response.json())
                 .then((data) => {
                      // Construct the URL for the download endpoint
-    const downloadUrl = `/download/${data.filename}`; // Ensure `data.filename` has the correct filename
+    const downloadUrl = `/download/${data.fileName}`; // Ensure `data.fileName` has the correct filename
 
     // Create a new link element
     const link = document.createElement('a');
